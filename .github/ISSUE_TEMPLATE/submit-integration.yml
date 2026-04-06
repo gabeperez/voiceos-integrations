@@ -1,0 +1,59 @@
+name: Submit Integration
+description: Submit your VoiceOS MCP integration to the marketplace
+title: "[Integration] "
+labels: ["new-integration"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Integration Name
+      placeholder: e.g. Spotify Controller
+    validations:
+      required: true
+
+  - type: input
+    id: repo
+    attributes:
+      label: GitHub Repository URL
+      placeholder: https://github.com/username/repo
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Short Description
+      placeholder: What does this integration do?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms
+      options:
+        - label: macOS
+        - label: Windows
+        - label: Linux
+
+  - type: textarea
+    id: tools
+    attributes:
+      label: MCP Tools Exposed
+      placeholder: |
+        List the MCP tools your integration provides, one per line:
+        - play_track
+        - pause_music
+        - search_songs
+
+  - type: input
+    id: icon
+    attributes:
+      label: Icon (emoji)
+      placeholder: e.g. 🎵
+
+  - type: input
+    id: requirements
+    attributes:
+      label: Requirements
+      placeholder: e.g. Node.js 18+ · Spotify Premium account

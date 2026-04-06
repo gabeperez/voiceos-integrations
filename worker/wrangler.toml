@@ -1,0 +1,11 @@
+name = "voiceos-submit"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+GITHUB_CLIENT_ID = "Ov23liVuyIKyg6OwqxmK"
+SITE_URL = "https://gabeperez.github.io/voiceos-integrations"
+GITHUB_REPO = "gabeperez/voiceos-integrations"
+
+# Set GITHUB_CLIENT_SECRET as a secret:
+# npx wrangler secret put GITHUB_CLIENT_SECRET
