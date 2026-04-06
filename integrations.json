@@ -1,0 +1,45 @@
+[
+  {
+    "id": "launcher",
+    "icon": "🚀",
+    "iconBg": "linear-gradient(135deg, #f0f4ff, #e8ecf4)",
+    "name": "macOS App Launcher",
+    "author": "@gabeperez",
+    "authorUrl": "https://github.com/gabeperez",
+    "repoUrl": "https://github.com/gabeperez/macos-app-launcher",
+    "desc": "Open, focus, quit apps and set volume by voice. Uses native <code style=\"color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82em;background:rgba(0,122,255,0.06);padding:1px 5px;border-radius:4px;\">open -a</code> and <code style=\"color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82em;background:rgba(0,122,255,0.06);padding:1px 5px;border-radius:4px;\">osascript</code> — much faster than alternatives. Say \"Open Chrome\" or \"Set volume to 40.\"",
+    "requirements": "macOS · Node.js 18+",
+    "tags": ["macOS", "productivity"],
+    "tools": ["open_app", "focus_app", "quit_app", "set_volume", "open_url", "list_running_apps"],
+    "badges": ["Featured", "Free"],
+    "platformBadges": ["macOS"],
+    "meta": { "stars": 1, "forks": 0, "language": "TypeScript" },
+    "steps": [
+      { "title": "Clone the repo", "code": "git clone https://github.com/gabeperez/macos-app-launcher.git\ncd macos-app-launcher\nnpm install\nchmod +x start.sh" },
+      { "title": "Add to VoiceOS", "code": "Settings → Integrations → Custom Integrations → Add", "note": "Name: 🚀 Launcher · Launch command: /absolute/path/to/macos-app-launcher/start.sh" },
+      { "title": "Try it out", "code": "\"Open Chrome\" · \"Set volume to 40\" · \"What apps are open?\"", "note": "Built-in aliases: browser → Chrome, code → Cursor, messages → Beeper" }
+    ]
+  },
+  {
+    "id": "poke",
+    "icon": "🌴",
+    "iconBg": "linear-gradient(135deg, #ecfdf5, #e0f7ed)",
+    "name": "Poke Bridge",
+    "author": "@gabeperez",
+    "authorUrl": "https://github.com/gabeperez",
+    "repoUrl": "https://github.com/gabeperez/poke-bridge",
+    "desc": "Voice-activate your iMessage AI agent. Trigger Poke to send emails, set reminders, add calendar events, and more — all without touching your phone.",
+    "requirements": "Poke account + V2 API key · Node.js 18+ · macOS or Windows",
+    "tags": ["ai", "productivity", "macOS", "windows"],
+    "tools": ["send_to_poke", "poke_reminder", "poke_draft_email", "poke_schedule"],
+    "badges": ["Featured", "Free", "New"],
+    "platformBadges": [],
+    "meta": { "stars": 2, "forks": 1, "language": "TypeScript" },
+    "steps": [
+      { "title": "Clone and install", "code": "git clone https://github.com/gabeperez/poke-bridge.git\ncd poke-bridge\nnpm install" },
+      { "title": "Configure your API key", "code": "cp start.sh.example start.sh\nchmod +x start.sh", "note": "Edit start.sh and replace your_v2_key_here with your Poke V2 key from poke.com/kitchen" },
+      { "title": "Add to VoiceOS", "code": "Settings → Integrations → Custom Integrations → Add", "note": "Name: 🌴 Poke · Launch command: /absolute/path/to/poke-bridge/start.sh" },
+      { "title": "Try it out", "code": "\"Ask Poke to remind me to call the client at 9am\"\n\"Tell Poke to draft an email to the team\"\n\"Have Poke add a standup Monday at 10am\"" }
+    ]
+  }
+]

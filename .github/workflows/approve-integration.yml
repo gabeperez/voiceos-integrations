@@ -1,0 +1,147 @@
+name: Approve Integration
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  add-integration:
+    if: github.event.label.name == 'approved'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse issue and add integration
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = context.payload.issue.body;
+            const issueUser = context.payload.issue.user.login;
+
+            // Parse structured fields from issue body
+            function parseField(name) {
+              const regex = new RegExp(`### ${name}\\s*\\n+([\\s\\S]*?)(?=\\n### |$)`);
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+
+            const name = parseField('Integration Name');
+            const repoUrl = parseField('GitHub Repository URL');
+            const desc = parseField('Short Description');
+            const platforms = parseField('Platforms');
+            const tools = parseField('MCP Tools Exposed');
+            const icon = parseField('Icon') || '🔌';
+            const requirements = parseField('Requirements');
+
+            if (!name || !repoUrl) {
+              core.setFailed('Missing required fields: Integration Name or GitHub Repository URL');
+              return;
+            }
+
+            // Generate a slug ID from the name
+            const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+            // Parse repo path for install steps
+            const repoPath = repoUrl.replace('https://github.com/', '');
+            const repoName = repoPath.split('/').pop();
+
+            // Parse platforms into tags
+            const tags = [];
+            if (platforms.includes('macOS')) tags.push('macOS');
+            if (platforms.includes('Windows')) tags.push('windows');
+            if (platforms.includes('Linux')) tags.push('linux');
+
+            // Parse tools list
+            const toolList = tools
+              .split('\n')
+              .map(t => t.replace(/^[-*]\s*/, '').trim())
+              .filter(t => t && t !== '_Not specified_');
+
+            // Build platform badges
+            const platformBadges = [];
+            if (platforms.includes('macOS')) platformBadges.push('macOS');
+            if (platforms.includes('Windows')) platformBadges.push('Windows');
+            if (platforms.includes('Linux')) platformBadges.push('Linux');
+
+            // Auto-generate install steps
+            const steps = [
+              {
+                title: 'Clone and install',
+                code: `git clone ${repoUrl}.git\ncd ${repoName}\nnpm install`
+              },
+              {
+                title: 'Add to VoiceOS',
+                code: 'Settings → Integrations → Custom Integrations → Add',
+                note: `Name: ${icon} ${name} · Launch command: /absolute/path/to/${repoName}/start.sh`
+              },
+              {
+                title: 'Try it out',
+                code: 'Say a command to test your new integration!'
+              }
+            ];
+
+            const newIntegration = {
+              id,
+              icon,
+              iconBg: 'var(--surface2)',
+              name,
+              author: `@${issueUser}`,
+              authorUrl: `https://github.com/${issueUser}`,
+              repoUrl,
+              desc,
+              requirements: requirements || '',
+              tags,
+              tools: toolList,
+              badges: ['New', 'Free'],
+              platformBadges,
+              meta: { stars: 0, forks: 0, language: '' },
+              steps
+            };
+
+            // Read existing integrations and append
+            const integrationsFile = 'integrations.json';
+            const existing = JSON.parse(fs.readFileSync(integrationsFile, 'utf8'));
+
+            // Check for duplicates
+            if (existing.some(e => e.id === id)) {
+              core.setFailed(`Integration with id "${id}" already exists`);
+              return;
+            }
+
+            existing.push(newIntegration);
+            fs.writeFileSync(integrationsFile, JSON.stringify(existing, null, 2) + '\n');
+
+            // Set outputs for commit message
+            core.exportVariable('INTEGRATION_NAME', name);
+            core.exportVariable('ISSUE_NUMBER', context.payload.issue.number);
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add integrations.json
+          git commit -m "Add integration: ${INTEGRATION_NAME} (closes #${ISSUE_NUMBER})"
+          git push
+
+      - name: Comment and close issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `🎉 **Your integration has been approved and added to the marketplace!**\n\nIt will appear on the site shortly. Thanks for contributing, @${issue.user.login}!`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: 'closed'
+            });
