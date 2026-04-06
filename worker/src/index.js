@@ -1,8 +1,9 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const origin = new URL(env.SITE_URL).origin;
     const cors = {
-      'Access-Control-Allow-Origin': env.SITE_URL,
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
