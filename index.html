@@ -927,91 +927,7 @@
 
   <div class="grid" id="card-grid">
 
-    <!-- CARD 1: macOS App Launcher -->
-    <div class="card featured" data-tags="macOS,productivity" onclick="openModal('launcher')">
-      <div class="card-header">
-        <div>
-          <div class="card-icon" style="background: linear-gradient(135deg, #f0f4ff, #e8ecf4);">🚀</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-featured">Featured</span>
-          <span class="badge badge-free">Free</span>
-          <span class="badge badge-macos">macOS</span>
-        </div>
-      </div>
-      <div>
-        <div class="card-name">macOS App Launcher</div>
-        <div class="card-author">by <a href="https://github.com/gabeperez" onclick="e => e.stopPropagation()">@gabeperez</a></div>
-      </div>
-      <div class="card-desc">Open, focus, quit apps and set volume by voice. Uses native <code style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82em;background:rgba(0,122,255,0.06);padding:1px 5px;border-radius:4px;">open -a</code> and <code style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82em;background:rgba(0,122,255,0.06);padding:1px 5px;border-radius:4px;">osascript</code> — much faster than alternatives. Say "Open Chrome" or "Set volume to 40."</div>
-      <div class="card-tools">
-        <span class="tool-pill">open_app</span>
-        <span class="tool-pill">focus_app</span>
-        <span class="tool-pill">quit_app</span>
-        <span class="tool-pill">set_volume</span>
-        <span class="tool-pill">open_url</span>
-        <span class="tool-pill">list_running_apps</span>
-      </div>
-      <div class="card-footer">
-        <div class="card-meta">
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            1
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
-            0 forks
-          </span>
-          <span class="meta-item">TypeScript</span>
-        </div>
-        <button class="install-btn" onclick="event.stopPropagation(); openModal('launcher')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Install
-        </button>
-      </div>
-    </div>
-
-    <!-- CARD 2: poke-bridge -->
-    <div class="card featured" data-tags="ai,productivity,macOS,windows" onclick="openModal('poke')">
-      <div class="card-header">
-        <div>
-          <div class="card-icon" style="background: linear-gradient(135deg, #ecfdf5, #e0f7ed);">🌴</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-featured">Featured</span>
-          <span class="badge badge-free">Free</span>
-          <span class="badge badge-new">New</span>
-        </div>
-      </div>
-      <div>
-        <div class="card-name">Poke Bridge</div>
-        <div class="card-author">by <a href="https://github.com/gabeperez" onclick="e => e.stopPropagation()">@gabeperez</a></div>
-      </div>
-      <div class="card-desc">Voice-activate your iMessage AI agent. Trigger Poke to send emails, set reminders, add calendar events, and more — all without touching your phone.</div>
-      <div class="card-tools">
-        <span class="tool-pill">send_to_poke</span>
-        <span class="tool-pill">poke_reminder</span>
-        <span class="tool-pill">poke_draft_email</span>
-        <span class="tool-pill">poke_schedule</span>
-      </div>
-      <div class="card-footer">
-        <div class="card-meta">
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            2
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
-            1 fork
-          </span>
-          <span class="meta-item">TypeScript</span>
-        </div>
-        <button class="install-btn" onclick="event.stopPropagation(); openModal('poke')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Install
-        </button>
-      </div>
-    </div>
+    <!-- Dynamic cards rendered by JS from integrations.json -->
 
     <!-- PLACEHOLDER: Coming soon -->
     <div class="card coming-soon" data-tags="macOS">
@@ -1070,39 +986,78 @@
 <div class="toast" id="toast">Copied to clipboard</div>
 
 <script>
-const integrations = {
-  launcher: {
-    icon: '🚀',
-    name: 'macOS App Launcher',
-    author: '@gabeperez',
-    authorUrl: 'https://github.com/gabeperez',
-    repoUrl: 'https://github.com/gabeperez/macos-app-launcher',
-    desc: 'A fast MCP server for opening, focusing, and quitting macOS apps — and opening URLs in your browser — by voice or from any MCP client. Uses native open -a and osascript for minimal latency.',
-    requirements: 'macOS · Node.js 18+',
-    steps: [
-      { title: 'Clone the repo', code: 'git clone https://github.com/gabeperez/macos-app-launcher.git\ncd macos-app-launcher\nnpm install\nchmod +x start.sh' },
-      { title: 'Add to VoiceOS', code: 'Settings → Integrations → Custom Integrations → Add', note: 'Name: 🚀 Launcher · Launch command: /absolute/path/to/macos-app-launcher/start.sh' },
-      { title: 'Try it out', code: '"Open Chrome" · "Set volume to 40" · "What apps are open?"', note: 'Built-in aliases: browser → Chrome, code → Cursor, messages → Beeper' },
-    ]
-  },
-  poke: {
-    icon: '🌴',
-    name: 'Poke Bridge',
-    author: '@gabeperez',
-    authorUrl: 'https://github.com/gabeperez',
-    repoUrl: 'https://github.com/gabeperez/poke-bridge',
-    desc: 'An MCP server that connects VoiceOS to Poke — your iMessage-based AI agent. Trigger Poke to send emails, set reminders, add calendar events, and more. Requires a Poke account and V2 API key.',
-    requirements: 'Poke account + V2 API key · Node.js 18+ · macOS or Windows',
-    steps: [
-      { title: 'Clone and install', code: 'git clone https://github.com/gabeperez/poke-bridge.git\ncd poke-bridge\nnpm install' },
-      { title: 'Configure your API key', code: 'cp start.sh.example start.sh\nchmod +x start.sh', note: 'Edit start.sh and replace your_v2_key_here with your Poke V2 key from poke.com/kitchen' },
-      { title: 'Add to VoiceOS', code: 'Settings → Integrations → Custom Integrations → Add', note: 'Name: 🌴 Poke · Launch command: /absolute/path/to/poke-bridge/start.sh' },
-      { title: 'Try it out', code: '"Ask Poke to remind me to call the client at 9am"\n"Tell Poke to draft an email to the team"\n"Have Poke add a standup Monday at 10am"' },
-    ]
-  }
-};
-
+let integrations = {};
 let currentFilter = 'all';
+
+const badgeClasses = { 'Featured': 'badge-featured', 'Free': 'badge-free', 'New': 'badge-new' };
+const platformClasses = { 'macOS': 'badge-macos', 'Windows': 'badge-windows', 'Linux': 'badge-linux' };
+
+function renderCard(d) {
+  const badges = (d.badges || []).map(b => `<span class="badge ${badgeClasses[b] || ''}">${b}</span>`).join('');
+  const platBadges = (d.platformBadges || []).map(p => `<span class="badge ${platformClasses[p] || ''}">${p}</span>`).join('');
+  const tools = (d.tools || []).map(t => `<span class="tool-pill">${t}</span>`).join('');
+  const forkLabel = d.meta?.forks === 1 ? '1 fork' : `${d.meta?.forks || 0} forks`;
+  return `
+    <div class="card featured" data-tags="${(d.tags || []).join(',')}" onclick="openModal('${d.id}')">
+      <div class="card-header">
+        <div><div class="card-icon" style="background: ${d.iconBg || 'var(--surface2)'}">${d.icon}</div></div>
+        <div class="card-badges">${badges}${platBadges}</div>
+      </div>
+      <div>
+        <div class="card-name">${d.name}</div>
+        <div class="card-author">by <a href="${d.authorUrl}" onclick="event.stopPropagation()">${d.author}</a></div>
+      </div>
+      <div class="card-desc">${d.desc}</div>
+      <div class="card-tools">${tools}</div>
+      <div class="card-footer">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            ${d.meta?.stars || 0}
+          </span>
+          <span class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+            ${forkLabel}
+          </span>
+          ${d.meta?.language ? `<span class="meta-item">${d.meta.language}</span>` : ''}
+        </div>
+        <button class="install-btn" onclick="event.stopPropagation(); openModal('${d.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Install
+        </button>
+      </div>
+    </div>`;
+}
+
+async function loadIntegrations() {
+  try {
+    const res = await fetch('integrations.json');
+    const list = await res.json();
+    const grid = document.getElementById('card-grid');
+    const comingSoon = grid.querySelector('.coming-soon');
+    list.forEach(d => {
+      integrations[d.id] = d;
+      comingSoon.insertAdjacentHTML('beforebegin', renderCard(d));
+    });
+    // Update stats
+    const statEl = document.getElementById('stat-integrations');
+    if (statEl) animateNumber(statEl, list.length);
+    const countEl = document.querySelector('.filter-count');
+    if (countEl) countEl.textContent = list.length;
+    // Animate cards in
+    document.querySelectorAll('.card').forEach((c, i) => {
+      c.style.opacity = '0';
+      c.style.transform = 'translateY(20px)';
+      c.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s, box-shadow 0.25s';
+      setTimeout(() => {
+        c.style.opacity = c.classList.contains('coming-soon') ? '0.5' : '1';
+        c.style.transform = 'translateY(0)';
+      }, 100 + i * 80);
+    });
+  } catch (e) {
+    console.error('Failed to load integrations:', e);
+  }
+}
 
 // ── SUBMISSION FLOW (GitHub OAuth) ──
 const WORKER_URL = 'https://voiceos-submit.perez-jg22.workers.dev';
@@ -1391,19 +1346,7 @@ function animateNumber(el, target, duration = 1200) {
 }
 
 window.addEventListener('load', () => {
-  const statEl = document.getElementById('stat-integrations');
-  animateNumber(statEl, 2);
-
-  // Staggered card entrance
-  document.querySelectorAll('.card').forEach((c, i) => {
-    c.style.opacity = '0';
-    c.style.transform = 'translateY(12px)';
-    c.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, box-shadow 0.2s';
-    setTimeout(() => {
-      c.style.opacity = c.classList.contains('coming-soon') ? '0.45' : '1';
-      c.style.transform = 'translateY(0)';
-    }, 100 + i * 80);
-  });
+  loadIntegrations();
 });
 </script>
 </body>
