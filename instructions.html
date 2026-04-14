@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Guide — VoiceOS MCP Integrations</title>
+<meta name="description" content="The definitive guide to building VoiceOS MCP integrations. Everything we learned the hard way — start.sh pattern, PATH fixes, all three integration types.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --border2: #2a2a3d;
+    --accent: #7c6aff;
+    --accent2: #a78bfa;
+    --accent3: #c4b5fd;
+    --green: #4ade80;
+    --cyan: #22d3ee;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .nav-logo .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    background: var(--accent);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: white !important;
+    padding: 7px 16px;
+    border-radius: 6px;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--accent2) !important; }
+
+  /* LAYOUT */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 2rem 8rem;
+  }
+
+  /* HERO */
+  .page-hero {
+    margin-bottom: 4rem;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent3);
+    border: 1px solid var(--border2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(124,106,255,0.08);
+  }
+
+  .hero-tag .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .page-hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .page-hero h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-hero p {
+    font-size: 1.05rem;
+    color: var(--text2);
+    max-width: 620px;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 3.5rem;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--text2);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  /* ERROR TABLE */
+  .error-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+
+  .error-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .error-table td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .error-table tr:last-child td { border-bottom: none; }
+
+  .error-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--red);
+    white-space: nowrap;
+    padding-right: 2rem;
+  }
+
+  .error-table td:last-child {
+    color: var(--text2);
+    font-size: 0.88rem;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .code-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { color: var(--accent3); border-color: var(--accent); }
+
+  .code-body {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+  }
+
+  .code-body code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--cyan);
+    line-height: 1.7;
+    white-space: pre;
+    display: block;
+  }
+
+  .code-body code .comment { color: var(--text3); }
+  .code-body code .key { color: var(--accent3); }
+  .code-body code .string { color: var(--green); }
+  .code-body code .keyword { color: var(--orange); }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 1rem 0;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .check-icon {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-icon svg { width: 10px; height: 10px; color: var(--accent3); }
+
+  code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78em;
+    color: var(--cyan);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  /* TYPE CARDS */
+  .type-grid {
+    display: grid;
+    gap: 1.25rem;
+    margin: 1rem 0;
+  }
+
+  .type-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .type-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .type-card.ts::before { background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+  .type-card.remote::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+  .type-card.python::before { background: linear-gradient(90deg, var(--orange), var(--pink)); }
+
+  .type-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .type-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .type-desc {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .type-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 6px;
+    margin-bottom: 0.75rem;
+  }
+
+  .badge-ts { background: rgba(124,106,255,0.15); color: var(--accent3); border: 1px solid rgba(124,106,255,0.25); }
+  .badge-remote { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+  .badge-python { background: rgba(251,146,60,0.12); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+  .badge-caution { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+  /* CALLOUT */
+  .callout {
+    display: flex;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  .callout.warn { border-left-color: var(--orange); }
+  .callout.error { border-left-color: var(--red); }
+  .callout.success { border-left-color: var(--green); }
+
+  .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* DEBUG TABLE */
+  .debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 1rem 0;
+  }
+
+  .debug-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .debug-table td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .debug-table tr:last-child td { border-bottom: none; }
+
+  .debug-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--red);
+    white-space: nowrap;
+    padding-right: 1.5rem;
+  }
+
+  .debug-table td:last-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--green);
+  }
+
+  /* INTEGRATIONS TABLE */
+  .integ-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 1rem 0;
+  }
+
+  .integ-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .integ-table td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .integ-table tr:last-child td { border-bottom: none; }
+
+  .integ-table td:first-child a {
+    color: var(--accent3);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .integ-table td:first-child a:hover { color: var(--accent2); }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .toc-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .toc-list a {
+    font-size: 0.88rem;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toc-list a:hover { color: var(--accent3); }
+
+  .toc-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  /* TIPS */
+  .tip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+
+  .tip-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .tip-desc {
+    font-size: 0.8rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+  }
+
+  footer a { color: var(--accent3); text-decoration: none; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--green);
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    .tip-grid { grid-template-columns: 1fr; }
+    .page { padding: 2rem 1.25rem 6rem; }
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .error-table td:first-child { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/voiceos-integrations" class="nav-logo">
+    VoiceOS <span class="badge">Integrations</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/voiceos-integrations">← Marketplace</a></li>
+    <li><a href="#types">Integration Types</a></li>
+    <li><a href="#debug">Debugging</a></li>
+    <li><a href="https://github.com/gabeperez" target="_blank" class="nav-cta">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="hero-tag">
+      <span class="dot"></span>
+      Build Guide · From Real-World Experience
+    </div>
+    <h1>How to build <span>VoiceOS</span><br>MCP integrations</h1>
+    <p>Everything we learned building poke-bridge, macos-app-launcher, and the Intercom integration from scratch — including the gotchas VoiceOS's own docs don't mention.</p>
+    <div class="hero-meta">Last updated April 2026 · Built on macOS · Node.js + TypeScript</div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-label">On this page</div>
+    <ul class="toc-list">
+      <li><a href="#problem"><span class="toc-num">01</span> The Core Problem</a></li>
+      <li><a href="#startsh"><span class="toc-num">02</span> The start.sh Pattern</a></li>
+      <li><a href="#checklist"><span class="toc-num">03</span> Checklist</a></li>
+      <li><a href="#types"><span class="toc-num">04</span> Three Integration Types</a></li>
+      <li><a href="#tips"><span class="toc-num">05</span> Tool Design Tips</a></li>
+      <li><a href="#debug"><span class="toc-num">06</span> Connecting & Debugging</a></li>
+      <li><a href="#claude-desktop"><span class="toc-num">07</span> Claude Desktop Config</a></li>
+      <li><a href="#what-docs-miss"><span class="toc-num">08</span> What VoiceOS's Docs Miss</a></li>
+    </ul>
+  </div>
+
+  <!-- 01 CORE PROBLEM -->
+  <div class="section" id="problem">
+    <div class="section-label">01 — The Core Problem</div>
+    <h2>VoiceOS has no PATH</h2>
+    <p>VoiceOS launches MCP servers with a minimal environment — no PATH, no shell, no env vars. Every error we hit across three integrations was the same root cause showing up differently:</p>
+
+    <table class="error-table">
+      <thead>
+        <tr><th>Error</th><th>Cause</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ENAMETOOLONG</td><td>Inline env vars (<code>KEY=value command</code>) in the launch field — VoiceOS can't parse them</td></tr>
+        <tr><td>EACCES</td><td>Script not executable — <code>chmod +x start.sh</code> was never run</td></tr>
+        <tr><td>env: node: No such file or directory</td><td><code>node</code> or <code>npx</code> not in VoiceOS's PATH, even when called with a full path</td></tr>
+        <tr><td>Connection closed / -32000</td><td>Any of the above — check the Logs view in VoiceOS for the specific line</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout success">
+      <span class="callout-icon">✓</span>
+      <div>The fix for all of them is the same: a <strong>start.sh wrapper script</strong> that sets PATH and env vars before launching your server.</div>
+    </div>
+  </div>
+
+  <!-- 02 START.SH -->
+  <div class="section" id="startsh">
+    <div class="section-label">02 — The start.sh Pattern</div>
+    <h2>The wrapper every integration needs</h2>
+    <p>Never put commands or API keys directly in the VoiceOS launch field. Always use a <code>start.sh</code> wrapper that handles PATH and secrets first.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">start.sh</span>
+        <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+      </div>
+      <div class="code-body"><code><span class="comment">#!/bin/bash</span>
+
+<span class="comment"># 1. Prepend full node bin path — VoiceOS has no PATH</span>
+<span class="keyword">export</span> PATH=<span class="string">"/Users/yourname/.nvm/versions/node/vX.X.X/bin:$PATH"</span>
+
+<span class="comment"># 2. Set secrets here — never inline in VoiceOS launch field</span>
+<span class="keyword">export</span> MY_API_KEY=<span class="string">"your_key_here"</span>
+
+<span class="comment"># 3. Launch your server</span>
+<span class="keyword">exec</span> npx tsx /path/to/my-server.ts</code></div>
+    </div>
+
+    <p>Find your node version and path:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">Terminal</span>
+        <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+      </div>
+      <div class="code-body"><code>ls ~/.nvm/versions/node/
+<span class="comment"># e.g. v24.14.1</span>
+<span class="comment"># full path: /Users/yourname/.nvm/versions/node/v24.14.1/bin</span></code></div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠</span>
+      <div>Even when calling <code>npx</code> with a full path, it still calls bare <code>node</code> internally. The <code>export PATH</code> line is not optional — without it you'll get <code>env: node: No such file or directory</code> regardless.</div>
+    </div>
+  </div>
+
+  <!-- 03 CHECKLIST -->
+  <div class="section" id="checklist">
+    <div class="section-label">03 — Checklist</div>
+    <h2>Before connecting to VoiceOS</h2>
+    <p>Run through this for every new integration:</p>
+
+    <ul class="checklist">
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>Use a <code>start.sh</code> wrapper — never put commands directly in VoiceOS</span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span><code>export PATH="/Users/yourname/.nvm/versions/node/vX.X.X/bin:$PATH"</code> at the top of start.sh</span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>Run <code>chmod +x start.sh</code> — required or VoiceOS throws <code>EACCES</code></span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>No spaces in the folder path — causes <code>ENAMETOOLONG</code></span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>Use the full absolute path in the VoiceOS launch field</span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>API keys go in <code>start.sh</code>, not the VoiceOS UI</span>
+      </li>
+      <li>
+        <div class="check-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span>Add <code>start.sh</code> to <code>.gitignore</code> — never commit secrets. Commit <code>start.sh.example</code> instead</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 04 THREE TYPES -->
+  <div class="section" id="types">
+    <div class="section-label">04 — Three Integration Types</div>
+    <h2>Pick the right pattern</h2>
+
+    <div class="type-grid">
+
+      <!-- TYPE 1: LOCAL TS -->
+      <div class="type-card ts">
+        <div class="type-num">Type 01</div>
+        <div class="type-title">Local TypeScript MCP Server</div>
+        <span class="type-badge badge-ts">TypeScript</span>
+        <div class="type-desc">Build your own tools. Best for macOS automation, API wrappers, and custom workflows. Recommended — most reliable across machines.</div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">my-server.ts</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code><span class="keyword">import</span> { McpServer } <span class="keyword">from</span> <span class="string">"@modelcontextprotocol/sdk/server/mcp.js"</span>;
+<span class="keyword">import</span> { StdioServerTransport } <span class="keyword">from</span> <span class="string">"@modelcontextprotocol/sdk/server/stdio.js"</span>;
+<span class="keyword">import</span> { z } <span class="keyword">from</span> <span class="string">"zod"</span>;
+
+<span class="keyword">const</span> server = <span class="keyword">new</span> McpServer({ name: <span class="string">"my-server"</span>, version: <span class="string">"1.0.0"</span> });
+
+server.tool(
+  <span class="string">"tool_name"</span>,
+  <span class="string">"What this does. Include example voice phrases."</span>,
+  { param: z.string().describe(<span class="string">"What this param is"</span>) },
+  <span class="keyword">async</span> ({ param }) => ({
+    content: [{ type: <span class="string">"text"</span>, text: `Result: ${param}` }]
+  })
+);
+
+<span class="keyword">await</span> server.connect(<span class="keyword">new</span> StdioServerTransport());</code></div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">start.sh</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code><span class="comment">#!/bin/bash</span>
+<span class="keyword">export</span> PATH=<span class="string">"/Users/yourname/.nvm/versions/node/v24.14.1/bin:$PATH"</span>
+<span class="keyword">export</span> MY_API_KEY=<span class="string">"your_key_here"</span>
+<span class="keyword">exec</span> node <span class="string">"$(dirname "$0")/node_modules/.bin/tsx"</span> <span class="string">"$(dirname "$0")/my-server.ts"</span></code></div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">Install</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code>npm install @modelcontextprotocol/sdk zod tsx typescript
+cp start.sh.example start.sh
+chmod +x start.sh</code></div>
+        </div>
+      </div>
+
+      <!-- TYPE 2: REMOTE -->
+      <div class="type-card remote">
+        <div class="type-num">Type 02</div>
+        <div class="type-title">Remote Hosted MCP (via mcp-remote)</div>
+        <span class="type-badge badge-remote">mcp-remote</span>
+        <div class="type-desc">The service hosts their own MCP server — you just bridge to it. Works for Intercom and any service with an MCP endpoint. No server file needed.</div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">start.sh</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code><span class="comment">#!/bin/bash</span>
+<span class="keyword">export</span> PATH=<span class="string">"/Users/yourname/.nvm/versions/node/v24.14.1/bin:$PATH"</span>
+<span class="keyword">export</span> API_TOKEN=<span class="string">"your_token_here"</span>
+
+<span class="keyword">exec</span> npx mcp-remote \
+  https://mcp.example.com/mcp \
+  --header <span class="string">"Authorization:Bearer ${API_TOKEN}"</span></code></div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>That's the entire integration. No package.json, no npm install — just start.sh and your API token.</div>
+        </div>
+      </div>
+
+      <!-- TYPE 3: PYTHON -->
+      <div class="type-card python">
+        <div class="type-num">Type 03</div>
+        <div class="type-title">Python MCP Server (FastMCP)</div>
+        <span class="type-badge badge-python">Python</span>
+        <span class="type-badge badge-caution">macOS caveat</span>
+        <div class="type-desc">Simpler for quick scripts — no npm, no package.json. But macOS ships Python 3.9 and FastMCP requires 3.10+. You need Homebrew Python.</div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">Setup (Homebrew)</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code>brew install python@3.12
+/opt/homebrew/bin/python3.12 -m pip install mcp</code></div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">my-server.py</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code><span class="keyword">from</span> mcp.server.fastmcp <span class="keyword">import</span> FastMCP
+
+mcp = FastMCP(<span class="string">"my-server"</span>)
+
+@mcp.tool()
+<span class="keyword">def</span> tool_name(param: str) -> str:
+    <span class="string">"""What this does. Include example voice phrases."""</span>
+    <span class="keyword">return</span> f<span class="string">"Result: {param}"</span>
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    mcp.run(transport=<span class="string">"stdio"</span>)</code></div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">start.sh</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+          <div class="code-body"><code><span class="comment">#!/bin/bash</span>
+<span class="keyword">export</span> MY_API_KEY=<span class="string">"your_key_here"</span>
+<span class="keyword">exec</span> /opt/homebrew/bin/python3.12 /path/to/my-server.py</code></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 05 TOOL DESIGN TIPS -->
+  <div class="section" id="tips">
+    <div class="section-label">05 — Tool Design Tips</div>
+    <h2>Writing tools VoiceOS actually understands</h2>
+    <p>These come from reverse-engineering VoiceOS's source code. The LLM uses your tool descriptions to decide which tool to call — treat them like voice command documentation.</p>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title">Descriptions are everything</div>
+        <div class="tip-desc">Write descriptions like you're writing for a voice assistant. Include the purpose AND example phrases the user might say.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-title">Keep responses short</div>
+        <div class="tip-desc">VoiceOS reads tool output aloud. Return concise summaries, not data dumps. "Opened Spotify" beats a JSON blob.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-title">Human-readable errors</div>
+        <div class="tip-desc">VoiceOS reads errors aloud too. Return "App not found: Notionn" — not a stack trace or a 500 error string.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-title">Name your server correctly</div>
+        <div class="tip-desc">The <code>name</code> field in McpServer should match your integration name — VoiceOS uses it internally for identification.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Description example</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Bad vs Good</span></div>
+      <div class="code-body"><code><span class="comment">// ❌ Too vague — VoiceOS won't know when to call this</span>
+<span class="string">"Opens an app"</span>
+
+<span class="comment">// ✅ Detailed — includes purpose and example phrases</span>
+<span class="string">"Instantly open a macOS application by name or alias.
+Say: 'open Chrome', 'launch Spotify', 'open Cursor', 'open Slack'.
+Aliases: browser=Chrome, code=Cursor, messages=Beeper, vpn=ProtonVPN."</span></code></div>
+    </div>
+  </div>
+
+  <!-- 06 CONNECTING & DEBUGGING -->
+  <div class="section" id="debug">
+    <div class="section-label">06 — Connecting & Debugging</div>
+    <h2>VoiceOS setup</h2>
+    <p><strong>Settings → Integrations → Custom Integrations → Add</strong></p>
+
+    <table class="error-table" style="margin: 1rem 0;">
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Name</td><td>Your integration name — emoji optional (e.g. 🌴 Poke)</td></tr>
+        <tr><td style="color: var(--text2);">Launch command</td><td>Full absolute path to start.sh — no spaces in path</td></tr>
+      </tbody>
+    </table>
+
+    <p>After saving, expand the Logs view. If you see errors:</p>
+
+    <table class="debug-table">
+      <thead><tr><th>Log message</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>EACCES</td><td>chmod +x start.sh</td></tr>
+        <tr><td>env: node: No such file or directory</td><td>Add export PATH=... to start.sh</td></tr>
+        <tr><td>ENAMETOOLONG</td><td>Remove spaces from folder name</td></tr>
+        <tr><td>0 tools / Connection closed</td><td>Check logs — usually one of the above</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 07 CLAUDE DESKTOP -->
+  <div class="section" id="claude-desktop">
+    <div class="section-label">07 — Claude Desktop</div>
+    <h2>Claude Desktop is easier</h2>
+    <p>Unlike VoiceOS, Claude Desktop handles env vars natively via the <code>env</code> key. No wrapper script needed.</p>
+    <p><strong>macOS:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Local TypeScript server</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+      <div class="code-body"><code>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"my-integration"</span>: {
+      <span class="key">"command"</span>: <span class="string">"/path/to/node_modules/.bin/tsx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"/path/to/my-server.ts"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"MY_API_KEY"</span>: <span class="string">"your_key_here"</span>
+      }
+    }
+  }
+}</code></div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Remote MCP (mcp-remote)</span><button class="copy-btn" onclick="copyBlock(this)">Copy</button></div>
+      <div class="code-body"><code>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"intercom"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"mcp-remote"</span>, <span class="string">"https://mcp.example.com/mcp"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"AUTH_HEADER"</span>: <span class="string">"Bearer your_token_here"</span>
+      }
+    }
+  }
+}</code></div>
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">💡</span>
+      <div>Restart Claude Desktop after saving the config file.</div>
+    </div>
+  </div>
+
+  <!-- 08 WHAT DOCS MISS -->
+  <div class="section" id="what-docs-miss">
+    <div class="section-label">08 — What VoiceOS's Docs Miss</div>
+    <h2>The official docs aren't enough</h2>
+    <p>VoiceOS's own build guide says:</p>
+    <ul style="list-style: none; margin: 0.5rem 0 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+      <li style="font-size: 0.88rem; color: var(--text2);">• TypeScript: <code>npx tsx /path/to/server.ts</code></li>
+      <li style="font-size: 0.88rem; color: var(--text2);">• Python: <code>python3 /path/to/server.py</code></li>
+    </ul>
+    <p>Both fail in practice. Here's what's missing:</p>
+
+    <table class="error-table">
+      <thead><tr><th>What docs say</th><th>Reality</th></tr></thead>
+      <tbody>
+        <tr><td style="color: var(--text2);">npx tsx server.ts</td><td>npx not in VoiceOS PATH — use start.sh with export PATH</td></tr>
+        <tr><td style="color: var(--text2);">python3 server.py</td><td>System Python 3.9 — FastMCP needs 3.10+, install via Homebrew</td></tr>
+        <tr><td style="color: var(--text2);">(not mentioned)</td><td>chmod +x start.sh is required — EACCES without it</td></tr>
+        <tr><td style="color: var(--text2);">(not mentioned)</td><td>Spaces in folder path break the launch command</td></tr>
+        <tr><td style="color: var(--text2);">(not mentioned)</td><td>Inline env vars in launch field cause ENAMETOOLONG</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout success" style="margin-top: 1.5rem;">
+      <span class="callout-icon">✓</span>
+      <div>The <code>start.sh</code> wrapper pattern in this guide solves all of it.</div>
+    </div>
+  </div>
+
+  <!-- BUILT INTEGRATIONS -->
+  <div class="section">
+    <div class="section-label">Integrations We've Built</div>
+    <h2>See it in action</h2>
+    <table class="integ-table">
+      <thead><tr><th>Integration</th><th>Type</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="https://github.com/gabeperez/poke-bridge" target="_blank">poke-bridge ↗</a></td>
+          <td style="color: var(--accent3); font-family: Space Mono, monospace; font-size: 0.72rem;">Local TS → API</td>
+          <td>Voice-activate your iMessage AI agent (Poke)</td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/gabeperez/macos-app-launcher" target="_blank">macos-app-launcher ↗</a></td>
+          <td style="color: var(--accent3); font-family: Space Mono, monospace; font-size: 0.72rem;">Local TS → osascript</td>
+          <td>Open, focus, quit macOS apps by voice</td>
+        </tr>
+        <tr>
+          <td>intercom-mcp</td>
+          <td style="color: var(--green); font-family: Space Mono, monospace; font-size: 0.72rem;">Remote (mcp-remote)</td>
+          <td>Search conversations and contacts in Intercom</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>VoiceOS Integrations · <a href="/voiceos-integrations">Marketplace</a> · <a href="https://github.com/gabeperez" target="_blank">GitHub</a> · Not affiliated with VoiceOS officially</p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Copied</div>
+
+<script>
+function copyBlock(btn) {
+  const block = btn.closest('.code-block');
+  const code = block.querySelector('code');
+  const text = code.innerText || code.textContent;
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  });
+}
+</script>
+</body>
+</html>
